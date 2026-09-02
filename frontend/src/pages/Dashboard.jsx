@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import API from "../services/api";
-
+import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import TaskForm from "../components/TaskForm";
 import TaskItem from "../components/TaskItem";
@@ -33,7 +33,7 @@ function Dashboard() {
 
       setError(
         error.response?.data?.message ||
-          "Failed to fetch tasks"
+        "Failed to fetch tasks"
       );
     } finally {
       setLoading(false);
@@ -175,6 +175,17 @@ function Dashboard() {
           </section>
         )}
       </main>
+      return (
+      <div className="app-container">
+        <Navbar />
+
+        <main className="dashboard">
+          {/* All your existing dashboard content */}
+        </main>
+
+        <Footer />
+      </div>
+      );
     </div>
   );
 }
