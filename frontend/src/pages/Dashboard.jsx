@@ -7,101 +7,129 @@ import TaskForm from "../components/TaskForm";
 import TaskItem from "../components/TaskItem";
 
 function Dashboard() {
-  const [tasks, setTasks] = useState([]);
+const [tasks, setTasks] = useState([]);
+const [loading, setLoading] = useState(true);
+const [filter, setFilter] = useState("all");
+const [error, setError] = useState("");
 
-  const [loading, setLoading] =
-    useState(true);
+const fetchTasks = async () => {
+try {
+setLoading(true);
+setError("");
 
-  const [filter, setFilter] =
-    useState("all");
 
-  const [error, setError] =
-    useState("");
+  const response = await API.get("/tasks");
 
-  const fetchTasks = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  setTasks(response.data.tasks);
+} catch (error) {
+  console.error(error);
 
-      const response = await API.get(
-        "/tasks"
-      );
-
-      setTasks(response.data.tasks);
-    } catch (error) {
-      console.error(error);
-
-      setError(
-        error.response?.data?.message ||
-        "Failed to fetch tasks"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const filteredTasks = tasks.filter(
-    (task) => {
-      if (filter === "completed") {
-        return task.completed;
-      }
-
-      if (filter === "pending") {
-        return !task.completed;
-      }
-
-      return true;
-    }
+  setError(
+    error.response?.data?.message ||
+      "Failed to fetch tasks"
   );
+} finally {
+  setLoading(false);
+}
 
-  const completedTasks = tasks.filter(
-    (task) => task.completed
-  ).length;
 
-  const pendingTasks =
-    tasks.length - completedTasks;
+};
 
-  return (
-    <div className="app-container">
-      <Navbar />
+useEffect(() => {
+fetchTasks();
+}, []);
 
-      <main className="dashboard">
-        <section className="dashboard-header">
-          <h1>My Tasks</h1>
+const filteredTasks = tasks.filter((task) => {
+if (filter === "completed") {
+return task.completed;
+}
+
+
+if (filter === "pending") {
+  return !task.completed;
+}
+
+return true;
+
+
+});
+
+const completedTasks = tasks.filter(
+(task) => task.completed
+).length;
+
+const pendingTasks =
+tasks.length - completedTasks;
+
+return ( <div className="app-container"> <Navbar />
+
+
+  <main className="dashboard">
+    {/* Header */}
+    <section className="dashboard-header">
+      <div>
+        <p className="dashboard-greeting">
+          👋 Welcome back!
+        </p>
+
+        <h1>Make today productive.</h1>
+
+        <p>
+          Stay organized and turn your goals
+          into achievements.
+        </p>
+      </div>
+
+      <div className="header-badge">
+        ✨ Focus Mode
+      </div>
+    </section>
+
+    {/* Statistics */}
+    <section className="stats-container">
+      <div className="stat-card total-card">
+        <div className="stat-icon">📋</div>
+
+        <div>
+          <h3>Total Tasks</h3>
+          <p>{tasks.length}</p>
+        </div>
+      </div>
+
+      <div className="stat-card pending-card">
+        <div className="stat-icon">⏳</div>
+
+        <div>
+          <h3>In Progress</h3>
+          <p>{pendingTasks}</p>
+        </div>
+      </div>
+
+      <div className="stat-card completed-card">
+        <div className="stat-icon">🎉</div>
+
+        <div>
+          <h3>Completed</h3>
+          <p>{completedTasks}</p>
+        </div>
+      </div>
+    </section>
+
+    {/* Add Task */}
+    <TaskForm fetchTasks={fetchTasks} />
+
+    {/* Tasks Header and Filters */}
+    <section className="tasks-section">
+      <div className="tasks-section-header">
+        <div>
+          <h2>Your Tasks</h2>
 
           <p>
-            Stay organized and get things done.
+            {filteredTasks.length} task
+            {filteredTasks.length !== 1 ? "s" : ""} showing
           </p>
-        </section>
+        </div>
 
-        {/* Statistics */}
-        <section className="stats-container">
-          <div className="stat-card">
-            <h3>Total</h3>
-            <p>{tasks.length}</p>
-          </div>
-
-          <div className="stat-card">
-            <h3>Pending</h3>
-            <p>{pendingTasks}</p>
-          </div>
-
-          <div className="stat-card">
-            <h3>Completed</h3>
-            <p>{completedTasks}</p>
-          </div>
-        </section>
-
-        {/* Add Task */}
-        <TaskForm
-          fetchTasks={fetchTasks}
-        />
-
-        {/* Filters */}
         <div className="filter-container">
           <button
             className={
@@ -109,9 +137,7 @@ function Dashboard() {
                 ? "filter-btn active"
                 : "filter-btn"
             }
-            onClick={() =>
-              setFilter("all")
-            }
+            onClick={() => setFilter("all")}
           >
             All
           </button>
@@ -122,11 +148,9 @@ function Dashboard() {
                 ? "filter-btn active"
                 : "filter-btn"
             }
-            onClick={() =>
-              setFilter("pending")
-            }
+            onClick={() => setFilter("pending")}
           >
-            Pending
+            Active
           </button>
 
           <button
@@ -135,59 +159,57 @@ function Dashboard() {
                 ? "filter-btn active"
                 : "filter-btn"
             }
-            onClick={() =>
-              setFilter("completed")
-            }
+            onClick={() => setFilter("completed")}
           >
             Completed
           </button>
         </div>
-
-        {/* Error */}
-        {error && (
-          <p className="error-message">
-            {error}
-          </p>
-        )}
-
-        {/* Loading */}
-        {loading ? (
-          <p className="loading-text">
-            Loading tasks...
-          </p>
-        ) : filteredTasks.length === 0 ? (
-          <div className="empty-state">
-            <h3>No tasks found</h3>
-
-            <p>
-              Add a new task to get started!
-            </p>
-          </div>
-        ) : (
-          <section className="task-list">
-            {filteredTasks.map((task) => (
-              <TaskItem
-                key={task._id}
-                task={task}
-                fetchTasks={fetchTasks}
-              />
-            ))}
-          </section>
-        )}
-      </main>
-      return (
-      <div className="app-container">
-        <Navbar />
-
-        <main className="dashboard">
-          {/* All your existing dashboard content */}
-        </main>
-
-        <Footer />
       </div>
-      );
-    </div>
-  );
+
+      {/* Error */}
+      {error && (
+        <div className="dashboard-error">
+          {error}
+        </div>
+      )}
+
+      {/* Loading */}
+      {loading ? (
+        <div className="loading-container">
+          <div className="loader"></div>
+
+          <p>Loading your tasks...</p>
+        </div>
+      ) : filteredTasks.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">📝</div>
+
+          <h3>No tasks found!</h3>
+
+          <p>
+            Add a new task and start making progress.
+          </p>
+        </div>
+      ) : (
+        <section className="task-list">
+          {filteredTasks.map((task) => (
+            <TaskItem
+              key={task._id}
+              task={task}
+              fetchTasks={fetchTasks}
+            />
+          ))}
+        </section>
+      )}
+    </section>
+  </main>
+
+  {/* Footer */}
+  <Footer />
+</div>
+
+
+);
 }
 
 export default Dashboard;
