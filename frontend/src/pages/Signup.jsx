@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import API from "../services/api";
 
 function Signup() {
@@ -11,7 +12,6 @@ function Signup() {
     password: "",
   });
 
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -24,20 +24,24 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setMessage("");
-    setLoading(true);
-
     try {
+      setLoading(true);
+
       const response = await API.post(
         "/auth/signup",
         formData
       );
 
-      alert(response.data.message);
+      toast.success(
+        response.data.message ||
+          "Account created successfully! 🎉"
+      );
 
-      navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 800);
     } catch (error) {
-      setMessage(
+      toast.error(
         error.response?.data?.message ||
           "Signup failed. Please try again."
       );
@@ -48,21 +52,21 @@ function Signup() {
 
   return (
     <div className="auth-container">
-      <div className="auth-card">
-        <h1>Create Account</h1>
-        <p className="auth-subtitle">
-          Start organizing your tasks today
-        </p>
+      <div className="auth-background-shape shape-one"></div>
+      <div className="auth-background-shape shape-two"></div>
 
-        {message && (
-          <p className="error-message">
-            {message}
-          </p>
-        )}
+      <div className="auth-card">
+        <div className="auth-logo">✓</div>
+
+        <h1>Create Account</h1>
+
+        <p className="auth-subtitle">
+          Start organizing your tasks today.
+        </p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Name</label>
+            <label>Full Name</label>
 
             <input
               type="text"
@@ -75,7 +79,7 @@ function Signup() {
           </div>
 
           <div className="form-group">
-            <label>Email</label>
+            <label>Email Address</label>
 
             <input
               type="email"
@@ -106,15 +110,15 @@ function Signup() {
             className="primary-btn"
             disabled={loading}
           >
-            {loading ? "Creating..." : "Sign Up"}
+            {loading
+              ? "Creating Account..."
+              : "Create Account →"}
           </button>
         </form>
 
         <p className="auth-switch">
           Already have an account?{" "}
-          <Link to="/login">
-            Login
-          </Link>
+          <Link to="/login">Login</Link>
         </p>
       </div>
     </div>

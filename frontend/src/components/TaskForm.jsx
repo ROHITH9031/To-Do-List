@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import API from "../services/api";
 
 function TaskForm({ fetchTasks }) {
@@ -7,19 +8,20 @@ function TaskForm({ fetchTasks }) {
     useState("");
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!title.trim()) {
-      setMessage("Task title is required");
+      toast.warning(
+        "Please enter a task title first!"
+      );
+
       return;
     }
 
     try {
       setLoading(true);
-      setMessage("");
 
       await API.post("/tasks", {
         title,
@@ -29,9 +31,13 @@ function TaskForm({ fetchTasks }) {
       setTitle("");
       setDescription("");
 
-      fetchTasks();
+      await fetchTasks();
+
+      toast.success(
+        "Task added successfully! 🚀"
+      );
     } catch (error) {
-      setMessage(
+      toast.error(
         error.response?.data?.message ||
           "Failed to create task"
       );
@@ -41,30 +47,38 @@ function TaskForm({ fetchTasks }) {
   };
 
   return (
-    <div className="task-form-container">
-      <h2>Add New Task</h2>
+    <section className="task-form-container">
+      <div className="task-form-header">
+        <div>
+          <p className="section-label">
+            CREATE A TASK
+          </p>
 
-      {message && (
-        <p className="error-message">
-          {message}
-        </p>
-      )}
+          <h2>What needs to be done?</h2>
+        </div>
+
+        <div className="form-header-icon">
+          +
+        </div>
+      </div>
 
       <form
         className="task-form"
         onSubmit={handleSubmit}
       >
-        <input
-          type="text"
-          placeholder="What do you need to do?"
-          value={title}
-          onChange={(e) =>
-            setTitle(e.target.value)
-          }
-        />
+        <div className="task-input-wrapper">
+          <input
+            type="text"
+            placeholder="Enter your task..."
+            value={title}
+            onChange={(e) =>
+              setTitle(e.target.value)
+            }
+          />
+        </div>
 
         <textarea
-          placeholder="Add description (optional)"
+          placeholder="Add a description (optional)"
           value={description}
           onChange={(e) =>
             setDescription(e.target.value)
@@ -76,10 +90,12 @@ function TaskForm({ fetchTasks }) {
           className="add-task-btn"
           disabled={loading}
         >
-          {loading ? "Adding..." : "+ Add Task"}
+          {loading
+            ? "Adding Task..."
+            : "+ Add Task"}
         </button>
       </form>
-    </div>
+    </section>
   );
 }
 

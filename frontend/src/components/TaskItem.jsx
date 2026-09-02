@@ -1,15 +1,18 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import API from "../services/api";
 
 function TaskItem({ task, fetchTasks }) {
   const [editing, setEditing] = useState(false);
 
-  const [title, setTitle] = useState(task.title);
+  const [title, setTitle] =
+    useState(task.title);
 
   const [description, setDescription] =
     useState(task.description || "");
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
   const toggleCompleted = async () => {
     try {
@@ -19,9 +22,19 @@ function TaskItem({ task, fetchTasks }) {
         completed: !task.completed,
       });
 
-      fetchTasks();
+      await fetchTasks();
+
+      if (!task.completed) {
+        toast.success(
+          "Task completed! 🎉 Great job!"
+        );
+      } else {
+        toast.info(
+          "Task moved back to active."
+        );
+      }
     } catch (error) {
-      alert(
+      toast.error(
         error.response?.data?.message ||
           "Failed to update task"
       );
@@ -46,9 +59,13 @@ function TaskItem({ task, fetchTasks }) {
         `/tasks/${task._id}`
       );
 
-      fetchTasks();
+      await fetchTasks();
+
+      toast.success(
+        "Task deleted successfully! 🗑️"
+      );
     } catch (error) {
-      alert(
+      toast.error(
         error.response?.data?.message ||
           "Failed to delete task"
       );
@@ -61,7 +78,10 @@ function TaskItem({ task, fetchTasks }) {
     e.preventDefault();
 
     if (!title.trim()) {
-      alert("Task title cannot be empty");
+      toast.warning(
+        "Task title cannot be empty!"
+      );
+
       return;
     }
 
@@ -75,9 +95,13 @@ function TaskItem({ task, fetchTasks }) {
 
       setEditing(false);
 
-      fetchTasks();
+      await fetchTasks();
+
+      toast.success(
+        "Task updated successfully! ✨"
+      );
     } catch (error) {
-      alert(
+      toast.error(
         error.response?.data?.message ||
           "Failed to update task"
       );
@@ -111,7 +135,9 @@ function TaskItem({ task, fetchTasks }) {
               className="save-btn"
               disabled={loading}
             >
-              Save
+              {loading
+                ? "Saving..."
+                : "Save"}
             </button>
 
             <button
@@ -120,6 +146,7 @@ function TaskItem({ task, fetchTasks }) {
               onClick={() =>
                 setEditing(false)
               }
+              disabled={loading}
             >
               Cancel
             </button>
@@ -130,20 +157,26 @@ function TaskItem({ task, fetchTasks }) {
   }
 
   return (
-    <div
+    <article
       className={`task-item ${
-        task.completed ? "completed" : ""
+        task.completed
+          ? "completed"
+          : ""
       }`}
     >
       <div className="task-content">
-        <input
-          type="checkbox"
-          checked={task.completed}
-          onChange={toggleCompleted}
-          disabled={loading}
-        />
+        <label className="custom-checkbox">
+          <input
+            type="checkbox"
+            checked={task.completed}
+            onChange={toggleCompleted}
+            disabled={loading}
+          />
 
-        <div>
+          <span className="checkmark"></span>
+        </label>
+
+        <div className="task-text">
           <h3>{task.title}</h3>
 
           {task.description && (
@@ -155,23 +188,23 @@ function TaskItem({ task, fetchTasks }) {
       <div className="task-actions">
         <button
           className="edit-btn"
-          onClick={() =>
-            setEditing(true)
-          }
+          onClick={() => setEditing(true)}
           disabled={loading}
+          title="Edit task"
         >
-          Edit
+          ✏️
         </button>
 
         <button
           className="delete-btn"
           onClick={deleteTask}
           disabled={loading}
+          title="Delete task"
         >
-          Delete
+          🗑️
         </button>
       </div>
-    </div>
+    </article>
   );
 }
 

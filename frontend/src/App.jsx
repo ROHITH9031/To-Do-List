@@ -14,17 +14,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Default Route */}
         <Route
           path="/"
           element={<Navigate to="/login" replace />}
         />
 
-        {/* Authentication Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected Dashboard */}
         <Route
           path="/dashboard"
           element={
@@ -34,7 +31,6 @@ function App() {
           }
         />
 
-        {/* Unknown Routes */}
         <Route
           path="*"
           element={<Navigate to="/login" replace />}

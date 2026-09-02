@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -13,26 +14,44 @@ function Navbar() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
-    navigate("/login");
+    toast.info("You have been logged out successfully 👋");
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 400);
   };
 
   return (
     <nav className="navbar">
-      <div className="logo">
-        ✓ My Tasks
-      </div>
+      <div className="navbar-content">
+        <div className="logo">
+          <div className="logo-icon">✓</div>
 
-      <div className="navbar-right">
-        <span className="welcome-text">
-          Hello, {user?.name || "User"}
-        </span>
+          <div>
+            <h2>TaskFlow</h2>
+            <span>Stay organized</span>
+          </div>
+        </div>
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+        <div className="navbar-right">
+          <div className="user-info">
+            <div className="user-avatar">
+              {user?.name?.charAt(0).toUpperCase() || "U"}
+            </div>
+
+            <div className="user-text">
+              <span>Welcome back</span>
+              <strong>{user?.name || "User"}</strong>
+            </div>
+          </div>
+
+          <button
+            className="logout-btn"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </nav>
   );

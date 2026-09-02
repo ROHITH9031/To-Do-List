@@ -1,42 +1,37 @@
 const express = require("express");
-const dotenv = require("dotenv");
 const cors = require("cors");
-
-const connectDB = require("./config/db");
-
-const authRoutes = require("./routes/authRoutes");
-const taskRoutes = require("./routes/taskRoutes");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
 const app = express();
 
-// CORS
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://to-do-list-sigma-lilac.vercel.app",
+];
+
 app.use(
-cors({
-origin: "https://to-do-list-sigma-lilac.vercel.app",
-methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-allowedHeaders: ["Content-Type", "Authorization"],
-})
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
 );
 
-// Middleware
 app.use(express.json());
 
-// Connect to MongoDB
-connectDB();
+// Your routes
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/tasks", require("./routes/taskRoutes"));
 
-// Test route
 app.get("/", (req, res) => {
-res.send("To-Do List API is running");
+  res.send("API is running...");
 });
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/tasks", taskRoutes);
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-console.log(`Server running on port ${PORT}`);
-});
+// Your MongoDB connection and server start code...

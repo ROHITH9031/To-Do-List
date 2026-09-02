@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import API from "../services/api";
 
 function Login() {
@@ -8,39 +9,35 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setMessage("");
-    setLoading(true);
-
     try {
-      const response = await API.post(
-        "/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      setLoading(true);
 
-      // Save token
-      localStorage.setItem(
-        "token",
-        response.data.token
-      );
+      const response = await API.post("/auth/login", {
+        email,
+        password,
+      });
 
-      // Save user information
+      localStorage.setItem("token", response.data.token);
+
       localStorage.setItem(
         "user",
         JSON.stringify(response.data.user)
       );
 
-      navigate("/dashboard");
+      toast.success(
+        `Welcome back, ${response.data.user.name}! 🎉`
+      );
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 500);
     } catch (error) {
-      setMessage(
+      toast.error(
         error.response?.data?.message ||
           "Login failed. Please try again."
       );
@@ -51,30 +48,27 @@ function Login() {
 
   return (
     <div className="auth-container">
+      <div className="auth-background-shape shape-one"></div>
+      <div className="auth-background-shape shape-two"></div>
+
       <div className="auth-card">
-        <h1>Welcome Back</h1>
+        <div className="auth-logo">✓</div>
+
+        <h1>Welcome Back!</h1>
 
         <p className="auth-subtitle">
-          Login to manage your tasks
+          Login to organize your day and achieve more.
         </p>
-
-        {message && (
-          <p className="error-message">
-            {message}
-          </p>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Email</label>
+            <label>Email Address</label>
 
             <input
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -86,9 +80,7 @@ function Login() {
               type="password"
               placeholder="Enter your password"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
@@ -98,15 +90,13 @@ function Login() {
             className="primary-btn"
             disabled={loading}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : "Login →"}
           </button>
         </form>
 
         <p className="auth-switch">
           Don't have an account?{" "}
-          <Link to="/signup">
-            Sign Up
-          </Link>
+          <Link to="/signup">Create Account</Link>
         </p>
       </div>
     </div>
