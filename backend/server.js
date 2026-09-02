@@ -4,13 +4,20 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
+const connectDB = require("./config/db");
+
 const app = express();
 
+// Connect to MongoDB
+connectDB();
+
+// Allowed frontend URLs
 const allowedOrigins = [
   "http://localhost:5173",
   "https://to-do-list-sigma-lilac.vercel.app",
 ];
 
+// Middleware
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -26,12 +33,18 @@ app.use(
 
 app.use(express.json());
 
-// Your routes
+// Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/tasks", require("./routes/taskRoutes"));
 
+// Test route
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// Your MongoDB connection and server start code...
+// Start server
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
